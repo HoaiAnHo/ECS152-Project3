@@ -1,9 +1,49 @@
-#fix me t.t
 from re import X
 import socket
 import struct
 import datetime
 import sys
+
+
+class server_putah():
+    welcomePort = 21 #Default port for TCP welcome
+    UDPport = 53 #Creating Default UDP port to switch to need to find any other ports we can use
+    state = ""
+    myIP = ""
+    myTCPSocket = None
+    myUDPSocket = None
+    num_UDP_Connections = 0
+
+    def __init__(self,IPin, TCPportIn):
+        state = "FREE"
+        print("Server being constructed")
+        myIp = IPin
+        welcomePort = TCPportIn
+        myTCPSocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        myTCPSocket.bind((myIp,welcomePort)) #TCP socket bound to IP address and Port
+        print("Server now listening at TCP port: " + self.welcomePort)
+        # Initiate 3-way handshake
+        #receive syn
+        #send syn/ack
+        #receive acks
+        # sending and listening loop
+        while 1:
+            # everything in this loop will multithread
+            state = "Listening"
+            self.accept()
+        # if we sent and receive FIN, log and end
+        # destructor
+
+    #TODO create timeout system + interpret incoming messages and setup a UDP socket to receive/Transmit from
+    def accept(self):
+        incoming_message,incoming_address = self.myTCPSocket.recvfrom(60)  
+        time_Received = datetime.datetime.now()
+        time_Received_To_String = time_Received.strftime("%H:%M:%S")[-3]
+        print("Message received at port: " + self.welcomePort + "at Time: " + time_Received_To_String)
+        #TODO Breakdown message here
+        
+        return [self.welcomePort,incoming_address,incoming_message]
+    
 
 # Used in transmission of packets. Creates a generic TCP header. 
 # TODO Trying to figure out if there is a way to omit fields
@@ -32,8 +72,15 @@ def send_A_Message(client,SourcePortIn,DestPortIn,DestinationIP,message):
     client.Socket.sendto(outGoingPacket,(DestinationIP, DestPortIn))
     timeSent = datetime.datetime.now()
     timeToStr = timeSent.strftime("%H:%M:%S")[-3]
+    
     # do message type if statements here
-    msg_type = "SYN/ACK" # (SYN/ACK, DATA, FIN)
+    if client.getAckNum():
+        msg_type = "SYN/ACK" # (SYN/ACK, DATA, FIN)
+    elif client.getAckNum():
+        msg_type = "DATA"
+    elif client.getAckNum():
+        msg_type = "FIN"
+    
     log_Interactions(SourcePortIn, DestPortIn, msg_type, len(message))
     print("Packet transmitted to: " + DestinationIP + "At time: " + timeToStr)
     
@@ -51,16 +98,9 @@ def receive_A_Message(client, DestPort):
 def create_Socket(DestHost, DestPort):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sender_socket:
         # send message to receiver at address (DestHost, DestPort)
-        for message_id in range(1, 11):
-            message = f"Ping #{message_id}".encode()
-            sender_socket.sendto(message, (DestHost, DestPort))
-        connect_Succeed()
-
-
-def connect_Succeed():
-    # print and log the IP address and port number of new connection sockets created
-    print("Success! Receiver IP: ", sys.argv[2], " ---------- Receiver Port Num: ", sys.argv[4], "\n")
-
+        message = "Pong"
+        sender_socket.sendto(message, (DestHost, DestPort))
+        print("Success! Receiver IP: ", sys.argv[2], " ---------- Receiver Port Num: ", sys.argv[4], "\n")
 
 def log_Interactions(SourcePort, DestPort, MsgType, MsgLen):
     # Format: "Source | Destination | Message_Type | Message_Length"
@@ -71,11 +111,12 @@ def log_Interactions(SourcePort, DestPort, MsgType, MsgLen):
         text_file.write(SourcePort, " | ", DestPort, " | ", MsgType, " | ", MsgLen, "\n")
 
     
-# argv[1] = --server_ip        
+# argv[1] = --_ip        
 # argv[2] = XXXX.XXXX.XXXX.XXXX is IP we're listening for
 # argv[3] = --port
-# argv[4] = YYYY is port num for receiver
+# argv[4] = YYYY is port num for client
 if __name__ == '__main__':
     # create a server log file at the start HERE
-    print("AAAAAAAAA")
-    # Initiate 3-way handshake
+    with open('log_putah_server.txt', 'w') as f:
+        print("AAAAAAAAA")
+    server_putah()
