@@ -58,10 +58,12 @@ def connect_Succeed():
     print("Success! Receiver IP: ", sys.argv[2], " ---------- Receiver Port Num: ", sys.argv[4], "\n")
 
 
-def log_Interactions():
+def log_Interactions(SourcePort, DestPort, MsgType, MsgLen):
     # Format: "Source | Destination | Message_Type | Message_Length"
         # Source/Destination are port nums, Message_Type = (SYN, SYN/ACK, ACK, DATA, FIN)
-    print("LOG!!!")
+    with open("log_putah.txt", "a") as text_file:
+        print(SourcePort, " | ", DestPort, " | ", MsgType, " | ", MsgLen, "\n")
+        text_file.write(SourcePort, " | ", DestPort, " | ", MsgType, " | ", MsgLen, "\n")
 
     
 # argv[1] = --server_ip        
