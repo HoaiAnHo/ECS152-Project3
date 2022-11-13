@@ -32,6 +32,9 @@ def send_A_Message(client,SourcePortIn,DestPortIn,DestinationIP,message):
     client.Socket.sendto(outGoingPacket,(DestinationIP, DestPortIn))
     timeSent = datetime.datetime.now()
     timeToStr = timeSent.strftime("%H:%M:%S")[-3]
+    # do message type if statements here
+    msg_type = "SYN/ACK" # (SYN/ACK, DATA, FIN)
+    log_Interactions(SourcePortIn, DestPortIn, msg_type, len(message))
     print("Packet transmitted to: " + DestinationIP + "At time: " + timeToStr)
     
 
@@ -51,6 +54,7 @@ def create_Socket(DestHost, DestPort):
         for message_id in range(1, 11):
             message = f"Ping #{message_id}".encode()
             sender_socket.sendto(message, (DestHost, DestPort))
+        connect_Succeed()
 
 
 def connect_Succeed():
@@ -61,7 +65,8 @@ def connect_Succeed():
 def log_Interactions(SourcePort, DestPort, MsgType, MsgLen):
     # Format: "Source | Destination | Message_Type | Message_Length"
         # Source/Destination are port nums, Message_Type = (SYN, SYN/ACK, ACK, DATA, FIN)
-    with open("log_putah.txt", "a") as text_file:
+        # for server here, we're only using (SYN/ACK, DATA, FIN)
+    with open("log_putah_server.txt", "a") as text_file:
         print(SourcePort, " | ", DestPort, " | ", MsgType, " | ", MsgLen, "\n")
         text_file.write(SourcePort, " | ", DestPort, " | ", MsgType, " | ", MsgLen, "\n")
 
@@ -71,5 +76,6 @@ def log_Interactions(SourcePort, DestPort, MsgType, MsgLen):
 # argv[3] = --port
 # argv[4] = YYYY is port num for receiver
 if __name__ == '__main__':
+    # create a server log file at the start HERE
     print("AAAAAAAAA")
     # Initiate 3-way handshake
