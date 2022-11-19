@@ -7,7 +7,7 @@ import sys
 
 class server_putah():
     welcomePort = 21 # Default port num for welcoming
-    state = ""
+    state = "" #Used for tracking state of server
     myIP = ""
     myWelcomeSocket = None
     myUDPSocket = None
@@ -33,39 +33,73 @@ class server_putah():
         # if we sent and receive FIN, log and end
         # destructor
 
-    #TODO create timeout system + interpret incoming messages and setup a UDP socket to receive/Transmit from
+    #TODO create timeout system + Handle received messages after decode
     def accept(self):
-        incoming_message,incoming_address = self.myTCPSocket.recvfrom(60)  
+        incoming_message,incoming_address = self.myWelcomeSocket.recvfrom(60)  
         time_Received = datetime.datetime.now()
         time_Received_To_String = time_Received.strftime("%H:%M:%S")[-3]
         print("Message received at port: " + self.welcomePort + "at Time: " + time_Received_To_String)
-        #TODO Breakdown message here
         decodedMessage =  incoming_message.decode()
         print(decodedMessage)
+        self.state = "Receiving and Handling"
+        messageHandlerServer(decodedMessage,)
+        # Handle message here
         return
 
+    def messageHandlerServer(message, DestPort, DestIP, mySocketOut):
+        if message == "SYN":
+            # Check availability of ports (relevant in later parts)
+            # return SYNCACK to sender and connect them to new port
+            syncHandler(message, DestIP, DestPort, mySocketOut)
+        elif message == "ACK":
+            #UDP Comms
+            print("New UDP Connection Established")
+        elif message == "FIN":
+            #Close Socket used for cnxn
+            print("Closing connection on request from Client")
+        else:
+            print("Looks like message format was not correct or something unexpected")
+            print("Message: " + message)
+            print("Destination Port: " + DestPort + "Destination IP: " + DestIP)
+            print("Attempted to use the following port: " + mySocketOut)
+
+    # Generic function for sending message, Takes string message, converts to Bytes. Requires Dest IP, Dest Port and Local Port to transmit through
+    # Added port generic to allow call in other handling functions.
+    # would we be adding the ACKs here or in another function?
+    # I think I'd like to create handler that has 3 sub functions. One for sending SyncAck, 
+        # One for Sending new Port info, One for Fin
     def sendAMessage(message, destIp,destPort,mySocketOut):
-    {
-        mySocketOut.sendto(message.encode(),(destIp,destPort))
-    }
+        mySocketOut.sendto(bytes(message,"utf-8"),(destIp,destPort))
+        timeSent = datetime.datetime.now()
+        timeToStr = timeSent.strftime("%H:%M:%S")[-3]
+        print("Message: " + message + " transmitting")
+        log_Interactions(SourcePortIn, DestPortIn, msg_type, len(message))
+        print("Packet transmitted to: " + DestinationIP + "At time: " + timeToStr)
+                
+    
+    def syncHandler(DestIP,DestPort,mySocketOut):
+        #This might be a good spot to create a new port to handle UDP comms as opposed to Welcoming port.
+        sendAMessage("SYNC/ACK",DestIP,DestPort,mySocketOut)
 
 # Used in transmission of packets. Creates a generic TCP header. 
 # TODO Trying to figure out if there is a way to omit fields
-def make_a_TCPheader(sourcePortIn, DestPortIn, SequenceNum, AckNum, flagsIn):
-    print("Generating TCP Header...")
-    header = struct.pack(">H",sourcePortIn)
-    header += struct.pack(">H",DestPortIn)
-    header += struct.pack(">H",SequenceNum)
-    header += struct.pack(">H",AckNum)
-    #Offset? Something technical example online was 5<<4
-    header += struct.pack(">H", flagsIn)
-    #recieveWindow determines how many messages before ACK must be Sent
-    #TODO looking up how to calc checksum which should go here.
-    header += struct.pack(">H", 0) #Urgent Data PTR, not used in Project but needed for Packet Format
-    #TODO look up exact structure for TCP 
-    print("Packet Created")
-    print(header + "Is the header being sent")
-    return header
+#We don't actually need this anymore since we're not sending TCP packets. Comment out imo in case we want reference
+    
+# def make_a_TCPheader(sourcePortIn, DestPortIn, SequenceNum, AckNum, flagsIn):
+#     print("Generating TCP Header...")
+#     header = struct.pack(">H",sourcePortIn)
+#     header += struct.pack(">H",DestPortIn)
+#     header += struct.pack(">H",SequenceNum)
+#     header += struct.pack(">H",AckNum)
+#     #Offset? Something technical example online was 5<<4
+#     header += struct.pack(">H", flagsIn)
+#     #recieveWindow determines how many messages before ACK must be Sent
+#     #TODO looking up how to calc checksum which should go here.
+#     header += struct.pack(">H", 0) #Urgent Data PTR, not used in Project but needed for Packet Format
+#     #TODO look up exact structure for TCP 
+#     print("Packet Created")
+#     print(header + "Is the header being sent")
+#     return header
 
 
 def send_A_Message(client,SourcePortIn,DestPortIn,DestinationIP,message):

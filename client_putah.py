@@ -25,7 +25,7 @@ class client_putah():
         log_Interactions(self.myPort, self.serverPort, "SYN", 0)
         
         #receive syn/ack
-        while(1):
+        while 1:
             if mySocket.recvfrom(self.serverPort):
                 #send ack
                 self.mySocket.sendto(message, (self.serverIP, self.serverPort))
