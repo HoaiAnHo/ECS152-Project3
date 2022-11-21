@@ -33,24 +33,31 @@ class sender_solano():
 
         # append the last message with message id -1
         self.packets.append(create_message(-1, ""))
-        start = time.time()
-        for message in self.packets:
-            try:
-                print("send")
-            except:
-                print("oops send again")
-                # DevRTT = (1 - B) * DevRTT + B*abs(SampleRTT - EstimatedRTT)
-                # EstimatedRTT = (1 - a) * EstimatedRTT + a*SampleRTT
-                # Timeout Interval = EstimatedRTT + 4*DevRTT
-        end = time.time()
-        print("Time taken to transfer file: ", end - start, "\n")
-        print("Total bandwidth achieved: \n")
-        print("Packet loss observed: ")
+        
+        # create a udp socket
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as udp_socket:
+            # bind the socket to a OS port
+            udp_socket.bind(("localhost", 5000))
+            total_data = 0
+            start = time.time()
+            for message in self.packets:
+                try:
+                    print("send")
+                    total_data += len(message)
+                except:
+                    print("oops send again")
+                    # DevRTT = (1 - B) * DevRTT + B*abs(SampleRTT - EstimatedRTT)
+                    # EstimatedRTT = (1 - a) * EstimatedRTT + a*SampleRTT
+                    # Timeout Interval = EstimatedRTT + 4*DevRTT
+            end = time.time()
+            total_time = end - start
+            print("Time taken to transfer file: ", total_time, "\n")
+            print("Total bandwidth achieved: ", total_data / total_time,"\n")
+            print("Packet loss observed: ", len(message) - total_data)
             
         
     def send():
         print("send")
-
 
 # argv[1] == --dest_ip
 # argv[2] == XXXX.XXXX.XXXX.XXXX

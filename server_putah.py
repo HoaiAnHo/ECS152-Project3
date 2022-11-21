@@ -72,12 +72,12 @@ class server_putah():
     # would we be adding the ACKs here or in another function?
     # I think I'd like to create handler that has 3 sub functions. One for sending SyncAck, 
         # One for Sending new Port info, One for Fin
-    def sendAMessage(message, destIp,destPort,mySocketOut):
+    def sendAMessage(self, message, destIp,destPort,mySocketOut):
         mySocketOut.sendto(bytes(message,"utf-8"),(destIp,destPort))
         timeSent = datetime.datetime.now()
         timeToStr = timeSent.strftime("%H:%M:%S")[-3]
         print("Message: " + message + " transmitting")
-        log_Interactions(SourcePortIn, DestPortIn, msg_type, len(message))
+        log_Interactions(self.welcomePort, destPort, msg_type, len(message))
         print("Packet transmitted to: " + DestinationIP + "At time: " + timeToStr)
                 
     

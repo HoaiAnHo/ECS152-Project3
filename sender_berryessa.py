@@ -5,6 +5,7 @@ import datetime
 import sys
 import random
 import time
+import matplotlib.pyplot as plot
 
 class sender_berryessa():
     welcomePort = 21 # Default port num for welcoming
