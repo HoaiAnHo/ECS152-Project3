@@ -26,6 +26,12 @@ class receiver_solano():
             return
         if jitter_value > sys.argv[8]:
             time.sleep(jitter_value)
+            
+def log_Interactions(SourcePort, DestPort, MsgType, MsgLen):
+    # for client here, we're only using (SYN, ACK, DATA, FIN)
+    with open("log_putah_client.txt", "a") as text_file:
+        print(SourcePort, " | ", DestPort, " | ", MsgType, " | ", MsgLen, "\n")
+        text_file.write(SourcePort, " | ", DestPort, " | ", MsgType, " | ", MsgLen, "\n")
 
 
 # argv[1] == --ip
